@@ -1,6 +1,5 @@
 name: Generate Kubernetes deployment
 
-
 on:
   workflow_dispatch:
         inputs:
@@ -9,7 +8,7 @@ on:
                 required: true
                 type: string
             labels:
-                description: field `metadata.labels` for Deployment manifest, coma-separated. If not provided, it will not create labels field.
+                description: field `metadata.labels` for Deployment manifest, coma-separated in <label_key>=<label_value> manner. If not provided, it will not create labels field.
                 type: string
             replicas:
                 description: field 'spec.replicas' that indicates how many pods with the same image Deployment will create
