@@ -30,4 +30,4 @@ class Manifest:
 class Deployment(Manifest):
 
     template = "deployment.yaml.j2"
-    required_args = {"name"}
+    required_args = {"name", "image"}
