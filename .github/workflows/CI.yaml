@@ -1,0 +1,62 @@
+name: Kubernetes Manifests generation CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install linter
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+    - name: Run pylint
+      run: |
+        pylint *.py \
+          --disable=C0114,C0115,C0116 \
+          --max-line-length=120 \
+          --good-names=i,j,k,env,_ \
+          --ignore=tests --output-format=text --exit-zero > pylint_report.txt
+        cat pylint_report.txt
+    - name: Upload pylint report
+      uses: actions/upload-artifact@v4
+      with:
+        name: linter-report
+        path: pylint_report.txt
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_test.txt
+
+    - name: Run tests and save manifest
+      run: |
+        mkdir -p test-results
+        pytest --maxfail=1 --disable-warnings --json-report --json-report-file=test-results/manifest.json
+
+    - name: Upload test manifest
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-manifest
+        path: test-results/manifest.json
