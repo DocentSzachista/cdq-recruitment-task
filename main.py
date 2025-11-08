@@ -10,7 +10,7 @@ def prepare_parser():
     parser.add_argument("--replicas", type=int, default=3, help="Number of pod replicas that Kubernetes deployment will create. Defaults to 3")
     parser.add_argument("--envs", type=parse_coma_values, help="List of environment variables that should be added to the container provided comma separated in <env_name>=<env_value> manner")
     parser.add_argument("--image", type=str, required=True, help="Docker image that the container should use")
-    return parser.parse_args()
+    return parser.parse_known_args()[0]
 
 
 def parse_coma_values(env_string: str):
