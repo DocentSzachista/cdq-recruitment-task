@@ -19,7 +19,7 @@ class Manifest:
         """Valides if all of the required arguments for the manifest has been supplied"""
         missing_args = self.required_args - self._args.keys()
         if missing_args:
-            raise ValueError(f"Required arguments are missing: {", ".join(missing_args)}")
+            raise ValueError(f"Required arguments are missing: {', '.join(missing_args)}")
 
     def produce_manifest(self):
         """Generates kubernetes manifest from the file placed in manifests directory."""
