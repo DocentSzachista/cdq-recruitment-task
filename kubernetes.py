@@ -1,37 +1,33 @@
-from abc import abstractmethod, ABC
 from jinja2 import Environment, FileSystemLoader
 
 
-class Manifest(ABC):
-    dirpath = "manifests"
+class Manifest:
+    """Base class for kubernetes manifest generation program"""
 
-    @abstractmethod
+    dirpath = "manifests"
+    template = str()
+    required_args = set()
+
+    def __init__(self, args: dict):
+        if type(self) is Manifest:
+            raise TypeError("Cannot instantiate Manifest directly, use a subclass instead")
+        self._environment = Environment(loader=FileSystemLoader(self.dirpath))
+        self._args = args
+        self._check_args()
+
+    def _check_args(self):
+        """Valides if all of the required arguments for the manifest has been supplied"""
+        missing_args = self.required_args - self._args.keys()
+        if missing_args:
+            raise ValueError(f"Required arguments are missing: {", ".join(missing_args)}")
+
     def produce_manifest(self):
         """Generates kubernetes manifest from the file placed in manifests directory."""
-        return
-
-    def _parse_attributes(self, args: dict):
-        """Performs attributes checks if they are provided correct way"""
-        for key in self.expected_args:
-            setattr(self, key, args.get(key, {}))
+        template = self._environment.get_template(self.template)
+        return template.render(**self._args)
 
 
 class Deployment(Manifest):
 
-    expected_args = {"name", "envs", "replicas", "labels"}
-
-    def __init__(self, args):
-        self.environment = Environment(loader=FileSystemLoader(self.dirpath))
-        self.args = args
-
-
-    def produce_manifest(self):
-        template = self.environment.get_template("deployment.yaml.j2")
-        return template.render(
-            {
-                "name": self.args['name'],
-                "replicas": self.args['replicas'],
-                "labels": self.args['labels'],
-                "envs": self.args['envs'],
-            }
-        )
+    template = "deployment.yaml.j2"
+    required_args = {"name"}
