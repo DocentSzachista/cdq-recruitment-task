@@ -19,6 +19,8 @@ on:
                 type: string
 jobs:
     create-manifest:
+        env:
+          manifest_file: '${{github.event.inputs.name}}-deployment.yaml'
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v5
@@ -41,5 +43,14 @@ jobs:
             fi
 
             echo "OPTIONS=$options" >> $GITHUB_ENV
-        - name: Run script
-          run: eval python main.py $OPTIONS
+        - name: Run script to create manifest
+          run: eval python main.py $OPTIONS > '$manifest_file'
+        - name: Show '${{github.event.inputs.name}}' manifest
+          run: |
+            echo "--- Manifest file to preview ---"
+            cat $manifest_file
+        - name: Upload manifest to artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: Deployment manifest
+            path: $manifest_file
