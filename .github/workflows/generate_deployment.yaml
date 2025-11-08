@@ -43,4 +43,4 @@ jobs:
 
             echo "OPTIONS=$options" >> $GITHUB_ENV
         - name: Run script
-          run: python main.py $OPTIONS
+          run: eval python main.py $OPTIONS
