@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ name }}
+{% if labels -%}
+  labels:
+  {% for key, value in labels.items() -%}
+    {{ key }}: {{ value }}
+  {% endfor %}
+{% endif -%}
+spec:
+  replicas: {{ replicas }}
+  selector:
+    matchLabels:
+      app: {{ name }}
+  template:
+    metadata:
+      labels:
+        app: {{ name }}
+    spec:
+      containers:
+        - name: {{ name }}
+          image: {{ image }}
+          {% if envs -%}
+          env:
+          {% for key, value in envs.items() -%}
+          - name: {{ key }}
+            value: "{{ value }}"
+            {% endfor -%}
+          {% endif %}
