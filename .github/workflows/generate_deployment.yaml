@@ -32,16 +32,17 @@ jobs:
           run: python -m pip install -r requirements.txt
         - name: Prepare options
           run: |
+            labels='${{ github.event.inputs.labels }}'
+            envs='${{github.event.inputs.envs}}'
             options="--name '${{github.event.inputs.name}}' --image '${{github.event.inputs.name}}' --replicas ${{github.event.inputs.replicas}}"
 
-            if [ -n "${{ github.event.inputs.labels }}" ]; then
-                options="$options --labels '${{ github.event.inputs.labels }}'"
+            if [ -n "${labels}" ]; then
+                options="$options --labels $labels"
             fi
 
-            if [ -n "${{ github.event.inputs.envs }}" ]; then
-                options="$options --envs '${{ github.event.inputs.envs }}'"
+            if [ -n "${envs}" ]; then
+                options="$options --envs $envs"
             fi
-
             echo "OPTIONS=$options" >> $GITHUB_ENV
         - name: Run script to create manifest
           run: eval python main.py $OPTIONS > '$manifest_file'
