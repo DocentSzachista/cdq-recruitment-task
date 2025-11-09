@@ -1,5 +1,6 @@
 import argparse
 from kubernetes import Deployment
+import os
 import re
 
 RFC_1123 = r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
@@ -74,5 +75,11 @@ def parse_coma_values(env_string: str, is_label: bool):
 if __name__ == "__main__":
     args = vars(prepare_parser())
     deplo = Deployment(args)
-    print( deplo.produce_manifest() )
+    manifest = deplo.produce_manifest()
+    github_output = os.getenv("GITHUB_OUTPUT")
+    if github_output:
+        with open(github_output, "a") as stream:
+            stream.write(f"manifest={manifest}\n")
+    else:
+        print(manifest)
 
