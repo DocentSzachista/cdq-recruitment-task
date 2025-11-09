@@ -42,8 +42,9 @@ runs:
       shell: bash
     - name: Fetch the number's square
       run: |
+        output='${{github.event.inputs.output}}'
         if [ -n "${output}"]; then
-            eval python main.py $OPTIONS --output '${{github.event.inputs.output}}'
+            eval python main.py $OPTIONS --output $output
         else
             eval python main.py $OPTIONS
         fi
