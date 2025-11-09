@@ -1,6 +1,5 @@
 import argparse
 from kubernetes import Deployment
-import os
 import re
 
 RFC_1123 = r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
@@ -32,6 +31,9 @@ def prepare_parser():
         "--image", type=str, required=True,
         help="Docker image that the container should use (required)"
     )
+    parser.add_argument("--output", type=str,
+                        help="Optional file path to save the generated manifest")
+
     return parser.parse_known_args()[0]
 
 def validate_k8s_name(
@@ -74,12 +76,16 @@ def parse_coma_values(env_string: str, is_label: bool):
 
 if __name__ == "__main__":
     args = vars(prepare_parser())
+    output_file = args.pop("output")
     deplo = Deployment(args)
     manifest = deplo.produce_manifest()
-    github_output = os.getenv("GITHUB_OUTPUT")
-    if github_output:
-        with open(github_output, "a") as stream:
-            stream.write(f"manifest={manifest}\n")
+
+    if output_file:
+        if not output_file.endswith(".yaml"):
+            output_file += ".yaml"
+        with open(output_file, "w") as f:
+            f.write(manifest)
+        print(f"Manifest saved to {output_file}")
     else:
         print(manifest)
 

@@ -11,10 +11,10 @@ inputs:
       default: "3"
   envs:
       description: List of environment variables provided in  <environment_name>=<value> manner, coma-separated
-outputs:
-  manifest:
-    description: Filename of generated k8s manifest file saved o
-    value: ${{ steps.manifest.outputs.manifest }}
+  output:
+    description: Optional file path to save the generated manifest. `.yaml` will be added if missing.
+    required: false
+
 runs:
   using: 'composite'
   steps:
@@ -29,7 +29,6 @@ runs:
       run: |
         labels='${{ github.event.inputs.labels }}'
         envs='${{github.event.inputs.envs}}'
-
         options="--name '${{github.event.inputs.name}}' --image '${{github.event.inputs.name}}' --replicas ${{github.event.inputs.replicas}}"
         if [ -n "${labels}" ]; then
             options="$options --labels $labels"
@@ -42,5 +41,10 @@ runs:
         echo "OPTIONS=$options" >> $GITHUB_ENV
       shell: bash
     - name: Fetch the number's square
-      run: eval python main.py $OPTIONS
+      run: |
+        if [ -n "${output}"]; then
+            eval python main.py $OPTIONS --output '${{github.event.inputs.output}}'
+        else
+            eval python main.py $OPTIONS
+        fi
       shell: bash
