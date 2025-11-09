@@ -1,4 +1,7 @@
 # Kubernetes Deployment Manifest Generator
+[![Kubernetes Manifests generation CI](https://github.com/DocentSzachista/cdq-recruitment-task/actions/workflows/CI.yaml/badge.svg?branch=master)](https://github.com/DocentSzachista/cdq-recruitment-task/actions/workflows/CI.yaml)
+![Python](https://img.shields.io/badge/python-3.10-blue)
+
 
 This Python project generates Kubernetes Deployment manifests from command-line arguments using Jinja2 templates.
 
