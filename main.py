@@ -79,7 +79,6 @@ if __name__ == "__main__":
     output_file = args.pop("output")
     deplo = Deployment(args)
     manifest = deplo.produce_manifest()
-
     if output_file:
         if not output_file.endswith(".yaml"):
             output_file += ".yaml"

@@ -11,9 +11,9 @@ inputs:
       default: "3"
   envs:
       description: List of environment variables provided in  <environment_name>=<value> manner, coma-separated
-  output:
-    description: Optional file path to save the generated manifest. `.yaml` will be added if missing.
-    required: false
+  filename:
+    description: file path to save the generated manifest. `.yaml` will be added if missing.
+    required: True
 
 runs:
   using: 'composite'
@@ -27,9 +27,11 @@ runs:
       shell: bash
     - name: Pass Inputs to Shell
       run: |
-        labels='${{ github.event.inputs.labels }}'
-        envs='${{github.event.inputs.envs}}'
-        options="--name '${{github.event.inputs.name}}' --image '${{github.event.inputs.name}}' --replicas ${{github.event.inputs.replicas}}"
+        labels='${{ inputs.labels }}'
+        envs='${{inputs.envs}}'
+        output='${{inputs.filename}}'
+        options="--name ${{github.event.inputs.name}} --image '${{github.event.inputs.name}}' --replicas ${{github.event.inputs.replicas}} --output ${output} "
+
         if [ -n "${labels}" ]; then
             options="$options --labels $labels"
         fi
@@ -40,12 +42,6 @@ runs:
 
         echo "OPTIONS=$options" >> $GITHUB_ENV
       shell: bash
-    - name: Fetch the number's square
-      run: |
-        output='${{github.event.inputs.output}}'
-        if [ -n "${output}"]; then
-            eval python main.py $OPTIONS --output $output
-        else
-            eval python main.py $OPTIONS
-        fi
+    - name: Generate Deployment yaml file
+      run: eval python main.py $OPTIONS
       shell: bash
