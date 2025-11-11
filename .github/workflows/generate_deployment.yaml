@@ -45,7 +45,7 @@ jobs:
             fi
             echo "OPTIONS=$options" >> $GITHUB_ENV
         - name: Run script to create manifest
-          run: eval python main.py $OPTIONS > $manifest_file
+          run: eval python main.py deployment $OPTIONS > $manifest_file
         - name: Show '${{github.event.inputs.name}}' manifest
           run: |
             echo "--- Manifest file to preview ---"
