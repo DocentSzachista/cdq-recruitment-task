@@ -20,6 +20,7 @@ def test_parse_coma_values_invalid():
 def test_prepare_parser_valid(monkeypatch):
     test_args = [
         "program_name",
+        "deployment",
         "--name", "myapp",
         "--image", "nginx",
         "--replicas", "2",
@@ -35,9 +36,9 @@ def test_prepare_parser_valid(monkeypatch):
     assert args.labels == {"tier": "backend", "env": "prod"}
     assert args.envs == {"ENV": "prod", "DEBUG": "true"}
 
-
-def test_prepare_parser_missing_required(capsys, monkeypatch):
-    test_args = ["program_name", "--image", "nginx"]  # brak --name
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_prepare_parser_missing_required(program, capsys, monkeypatch):
+    test_args = ["program_name", program, "--image", "nginx"]  # brak --name
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit) as excinfo:
         prepare_parser()
@@ -46,44 +47,46 @@ def test_prepare_parser_missing_required(capsys, monkeypatch):
     assert "the following arguments are required: --name" in captured.err
     assert excinfo.value.code == 2
 
-
-def test_name_invalid(monkeypatch):
-    test_args = ["program_name", "--name", "Invalid_Name!", "--image", "nginx"]
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_name_invalid(program, monkeypatch):
+    test_args = ["program_name", program, "--name", "Invalid_Name!", "--image", "nginx"]
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit):
         prepare_parser()
 
-def test_name_too_long(monkeypatch):
+
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_name_too_long(program, monkeypatch):
     long_name = "a" * 64
-    test_args = ["program_name", "--name", long_name, "--image", "nginx"]
+    test_args = ["program_name", program, "--name", long_name, "--image", "nginx"]
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit):
         prepare_parser()
 
-
-def test_labels_invalid_format(monkeypatch):
-    test_args = ["program_name", "--name", "app", "--image", "nginx", "--labels", "invalidlabel"]
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_labels_invalid_format(program, monkeypatch):
+    test_args = ["program_name", program, "--name", "app", "--image", "nginx", "--labels", "invalidlabel"]
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit):
         prepare_parser()
 
-
-def test_labels_invalid_value(monkeypatch):
-    test_args = ["program_name", "--name", "app", "--image", "nginx", "--labels", "env=pro_"]
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_labels_invalid_value(program, monkeypatch):
+    test_args = ["program_name", program, "--name", "app", "--image", "nginx", "--labels", "env=pro_"]
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit):
         prepare_parser()
 
-
-def test_envs_invalid_key(monkeypatch):
-    test_args = ["program_name", "--name", "app", "--image", "nginx", "--envs", "9INVALID=value"]
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_envs_invalid_key(program, monkeypatch):
+    test_args = ["program_name", program, "--name", "app", "--image", "nginx", "--envs", "9INVALID=value"]
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit):
         prepare_parser()
 
-
-def test_envs_missing_equals(monkeypatch):
-    test_args = ["program_name", "--name", "app", "--image", "nginx", "--envs", "DEBUGtrue"]
+@pytest.mark.parametrize("program", ["deployment", "pod"])
+def test_envs_missing_equals(program, monkeypatch):
+    test_args = ["program_name", program, "--name", "app", "--image", "nginx", "--envs", "DEBUGtrue"]
     monkeypatch.setattr("sys.argv", test_args)
     with pytest.raises(SystemExit):
         prepare_parser()
