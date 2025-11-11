@@ -42,13 +42,43 @@ pip install -r requirements_test.txt
 
 ```bash
 python main.py \
-  --name my-app \
-  --image nginx:latest \
+  deployment \
+  --name nginx \
+  --image nginx \
   --replicas 2 \
   --labels app=myapp,env=dev \
   --envs DEBUG=True,LOG_LEVEL=info
 ```
 
+It creates a Deployment manifest and prints it on the screen
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: myapp
+    env: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          env:
+          - name:  DEBUG
+            value: "True"
+          - name: LOG_LEVEL
+            value: "info"
+```
 
 ## How to contribute/extend project
 
@@ -74,11 +104,15 @@ To add support for new Kubernetes resources or customize existing functionality,
    - Instantiate it with parsed arguments and call `produce_manifest()`:
      ```python
      from kubernetes import Service
-
      args = vars(prepare_parser())
-     service = Service(args)
-     manifest = service.produce_manifest()
-     print(manifest)
+     command = args.pop("command")
+     if command == "deployment":
+         resource = Deployment(args)
+     if command == "pod":
+         resource = Pod(args)
+     if command == "service":
+         resource = Service(args)
+     print(resource.produce_manifest())
      ```
 
 4. **Add CLI Arguments if Needed**

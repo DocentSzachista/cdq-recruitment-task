@@ -11,7 +11,7 @@ class Manifest:
     def __init__(self, args: dict):
         if type(self) is Manifest:
             raise TypeError("Cannot instantiate Manifest directly, use a subclass instead")
-        self._environment = Environment(loader=FileSystemLoader(self.dirpath))
+        self._environment = Environment(loader=FileSystemLoader(self.dirpath), trim_blocks=True)
         self._args = args
         self._check_args()
 
@@ -27,7 +27,12 @@ class Manifest:
         return template.render(**self._args)
 
 
-class Deployment(Manifest):
+class Pod(Manifest):
+
+    template = "pod.yaml.j2"
+    required_args = {"name", "image"}
+
+
+class Deployment(Pod):
 
     template = "deployment.yaml.j2"
-    required_args = {"name", "image"}
