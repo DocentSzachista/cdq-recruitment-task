@@ -6,7 +6,7 @@ metadata:
   labels:
   {% for key, value in labels.items() -%}
     {{ key }}: {{ value }}
-  {% endfor %}
+  {%- endfor %}
 {% endif -%}
 spec:
   replicas: {{ replicas }}

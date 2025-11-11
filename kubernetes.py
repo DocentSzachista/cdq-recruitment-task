@@ -27,7 +27,12 @@ class Manifest:
         return template.render(**self._args)
 
 
-class Deployment(Manifest):
+class Pod(Manifest):
+
+    template = "pod.yaml.j2"
+    required_args = {"name", "image"}
+
+
+class Deployment(Pod):
 
     template = "deployment.yaml.j2"
-    required_args = {"name", "image"}

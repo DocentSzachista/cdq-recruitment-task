@@ -1,27 +1,39 @@
 import argparse
-from kubernetes import Deployment
+from kubernetes import Deployment, Pod
 import re
 
 RFC_1123 = r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
 LABELS_REGEX = r'([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]'
 ENV_NAME_REGEX=r"[A-Za-z_][A-Za-z0-9_]*"
 
+
 def prepare_parser():
     parser = argparse.ArgumentParser(
-        description="Program that basing on provided arguments generates Kubernetes yaml manifest describing Deployment"
+        description="Program that basing on provided arguments generates Kubernetes yaml manifests."
     )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    prepare_deployment_subparser(
+        subparsers.add_parser("deployment", description="Kubernetes Deployment manifest")
+    )
+    prepare_pod_subparser(
+        subparsers.add_parser("pod", description="Kubernetes Pod manifest")
+    )
+
+    return parser.parse_known_args()[0]
+
+
+def prepare_metadata_arguments(parser: argparse.ArgumentParser) -> None:
+
     parser.add_argument(
         "--name", type=validate_k8s_name, required=True,
-        help="Container and resource name (required)"
+        help="Resource name (required)"
     )
     parser.add_argument(
         "--labels", type=parse_label,
-        help="Labels describing deployment, coma-separated provided in <label_name>=<label_value>"
+        help="Labels describing resource, coma-separated provided in <label_name>=<label_value>"
     )
-    parser.add_argument(
-        "--replicas", type=int, default=3,
-        help="Number of pod replicas that Kubernetes deployment will create. Defaults to 3"
-    )
+
+def prepare_container_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--envs", type=parse_env,
         help="List of environment variables that should be added to the container provided comma separated in <env_name>=<env_value> manner"
@@ -31,7 +43,22 @@ def prepare_parser():
         "--image", type=str, required=True,
         help="Docker image that the container should use (required)"
     )
-    return parser.parse_known_args()[0]
+
+def prepare_deployment_subparser(parser: argparse.ArgumentParser):
+
+    prepare_metadata_arguments(parser)
+    prepare_container_arguments(parser)
+    parser.add_argument(
+        "--replicas", type=int, default=3,
+        help="Number of pod replicas that Kubernetes deployment will create. Defaults to 3"
+    )
+
+
+def prepare_pod_subparser(parser: argparse.ArgumentParser):
+
+    prepare_metadata_arguments(parser)
+    prepare_container_arguments(parser)
+
 
 def validate_k8s_name(
         value: str
@@ -49,7 +76,6 @@ def parse_env(env_string: str):
 
 def parse_label(env_string: str):
     return parse_coma_values(env_string, True)
-
 
 def parse_coma_values(env_string: str, is_label: bool):
     return_dict = {}
@@ -73,6 +99,10 @@ def parse_coma_values(env_string: str, is_label: bool):
 
 if __name__ == "__main__":
     args = vars(prepare_parser())
-    deplo = Deployment(args)
-    print( deplo.produce_manifest() )
+    command = args.pop("command")
+    if command == "deployment":
+        resource = Deployment(args)
+    if command == "pod":
+        resource = Pod(args)
+    print(resource.produce_manifest())
 
