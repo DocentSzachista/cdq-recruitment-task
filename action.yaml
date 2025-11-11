@@ -1,0 +1,47 @@
+name: 'Kubernetes manifest generator'
+description: 'A Github Action that generates Kubernetes Deployment manifest depending on an input'
+inputs:
+  name:
+      description: object and container name for Deployment manifest
+      required: true
+  labels:
+      description: field `metadata.labels` for Deployment manifest, coma-separated in <label_key>=<label_value> manner. If not provided, it will not create `metadata.labes`.
+  replicas:
+      description: field 'spec.replicas' that indicates how many pods with the same image Deployment will create. Defaults to 3.
+      default: "3"
+  envs:
+      description: List of environment variables provided in  <environment_name>=<value> manner, coma-separated
+  filename:
+    description: file path to save the generated manifest. `.yaml` will be added if missing.
+    required: True
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+      shell: bash
+    - name: Pass Inputs to Shell
+      run: |
+        labels='${{ inputs.labels }}'
+        envs='${{inputs.envs}}'
+        output='${{inputs.filename}}'
+        options="--name ${{github.event.inputs.name}} --image '${{github.event.inputs.name}}' --replicas ${{github.event.inputs.replicas}} --output ${output} "
+
+        if [ -n "${labels}" ]; then
+            options="$options --labels $labels"
+        fi
+
+        if [ -n "${envs}" ]; then
+            options="$options --envs $envs"
+        fi
+
+        echo "OPTIONS=$options" >> $GITHUB_ENV
+      shell: bash
+    - name: Generate Deployment yaml file
+      run: eval python main.py deployment $OPTIONS
+      shell: bash

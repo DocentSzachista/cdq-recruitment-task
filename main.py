@@ -11,6 +11,7 @@ def prepare_parser():
     parser = argparse.ArgumentParser(
         description="Program that basing on provided arguments generates Kubernetes yaml manifests."
     )
+
     subparsers = parser.add_subparsers(dest="command", required=True)
     prepare_deployment_subparser(
         subparsers.add_parser("deployment", description="Kubernetes Deployment manifest")
@@ -18,6 +19,7 @@ def prepare_parser():
     prepare_pod_subparser(
         subparsers.add_parser("pod", description="Kubernetes Pod manifest")
     )
+
 
     return parser.parse_known_args()[0]
 
@@ -44,6 +46,8 @@ def prepare_container_arguments(parser: argparse.ArgumentParser) -> None:
         help="Docker image that the container should use (required)"
     )
 
+
+
 def prepare_deployment_subparser(parser: argparse.ArgumentParser):
 
     prepare_metadata_arguments(parser)
@@ -52,13 +56,18 @@ def prepare_deployment_subparser(parser: argparse.ArgumentParser):
         "--replicas", type=int, default=3,
         help="Number of pod replicas that Kubernetes deployment will create. Defaults to 3"
     )
+    parser.add_argument("--output", type=str,
+        help="Optional file path to save the generated manifest"
+    )
 
 
 def prepare_pod_subparser(parser: argparse.ArgumentParser):
 
     prepare_metadata_arguments(parser)
     prepare_container_arguments(parser)
-
+    parser.add_argument("--output", type=str,
+        help="Optional file path to save the generated manifest"
+    )
 
 def validate_k8s_name(
         value: str
@@ -101,10 +110,21 @@ def parse_coma_values(env_string: str, is_label: bool):
 
 if __name__ == "__main__":
     args = vars(prepare_parser())
+    print(args)
+
+    output_file = args.pop("output")
     command = args.pop("command")
     if command == "deployment":
         resource = Deployment(args)
     if command == "pod":
         resource = Pod(args)
-    print(resource.produce_manifest())
+    manifest = resource.produce_manifest()
+    if output_file:
+        if not output_file.endswith(".yaml"):
+            output_file += ".yaml"
+        with open(output_file, "w") as f:
+            f.write(manifest)
+        print(f"Manifest saved to {output_file}")
+    else:
+        print(manifest)
 
