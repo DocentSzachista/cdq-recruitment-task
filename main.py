@@ -25,7 +25,7 @@ def prepare_parser():
 def prepare_metadata_arguments(parser: argparse.ArgumentParser) -> None:
 
     parser.add_argument(
-        "--name", type=validate_k8s_name,
+        "--name", type=validate_k8s_name, required=True,
         help="Resource name (required)"
     )
     parser.add_argument(
