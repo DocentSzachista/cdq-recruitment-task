@@ -43,5 +43,5 @@ runs:
         echo "OPTIONS=$options" >> $GITHUB_ENV
       shell: bash
     - name: Generate Deployment yaml file
-      run: eval python main.py $OPTIONS
+      run: eval python main.py deployment $OPTIONS
       shell: bash
