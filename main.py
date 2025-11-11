@@ -25,7 +25,7 @@ def prepare_parser():
 def prepare_metadata_arguments(parser: argparse.ArgumentParser) -> None:
 
     parser.add_argument(
-        "--name", type=validate_k8s_name, required=True,
+        "--name", type=validate_k8s_name,
         help="Resource name (required)"
     )
     parser.add_argument(
@@ -66,9 +66,11 @@ def validate_k8s_name(
     pattern = re.compile(RFC_1123)
     result = pattern.fullmatch(value)
     if not result:
-        raise argparse.ArgumentError(message=f"Invalid name {value}: must match DNS-1123 label pattern")
+        raise argparse.ArgumentTypeError(f"Invalid name {value}: must match DNS-1123 label pattern")
+    if "." in value:
+        raise argparse.ArgumentTypeError(f"Invalid value for container name {value}: must not contain dots.")
     if len(value) > 63:
-        raise argparse.ArgumentError(message="Resource name must not exceed 63 characters.")
+        raise argparse.ArgumentTypeError("Resource name must not exceed 63 characters.")
     return value
 
 def parse_env(env_string: str):

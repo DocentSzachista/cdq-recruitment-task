@@ -2,20 +2,20 @@ apiVersion: apps/v1
 kind: Pod
 metadata:
   name: {{ name }}
-{% if labels -%}
+{% if labels %}
   labels:
-  {% for key, value in labels.items() -%}
+{% for key, value in labels.items() %}
     {{ key }}: {{ value }}
-  {%- endfor %}
-{% endif -%}
+{% endfor %}
+{% endif %}
 spec:
   containers:
     - name: {{ name }}
       image: {{ image }}
-      {% if envs -%}
+{% if envs %}
       env:
-      {% for key, value in envs.items() -%}
+{% for key, value in envs.items() %}
         - name: {{ key }}
           value: "{{ value }}"
-      {% endfor -%}
-      {% endif %}
+{% endfor %}
+{% endif %}

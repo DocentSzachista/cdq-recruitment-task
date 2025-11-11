@@ -2,12 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ name }}
-{% if labels -%}
+{% if labels %}
   labels:
-  {% for key, value in labels.items() -%}
+{% for key, value in labels.items() %}
     {{ key }}: {{ value }}
-  {%- endfor %}
-{% endif -%}
+{% endfor %}
+{% endif %}
 spec:
   replicas: {{ replicas }}
   selector:
