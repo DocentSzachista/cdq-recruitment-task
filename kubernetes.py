@@ -7,6 +7,7 @@ class Manifest:
     dirpath = "manifests"
     template = str()
     required_args = set()
+    default_args_values = dict()
 
     def __init__(self, args: dict) -> None:
         if type(self) is Manifest:
@@ -22,6 +23,8 @@ class Manifest:
         missing_args = self.required_args - self._args.keys()
         if missing_args:
             raise ValueError(f"Required arguments are missing: {', '.join(missing_args)}")
+        for key, value in self.default_args_values.items():
+            self._args.setdefault(key, value)
 
     def produce_manifest(self) -> str:
         """Generates kubernetes manifest from the file placed in manifests directory."""
@@ -33,9 +36,9 @@ class Pod(Manifest):
 
     template = "pod.yaml.j2"
     required_args = {"name", "image"}
-    default_args_values = {"replicas": 3}
+
 
 
 class Deployment(Pod):
-
+    default_args_values = {"replicas": 3}
     template = "deployment.yaml.j2"
