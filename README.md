@@ -32,6 +32,7 @@ pip install -r requirements_test.txt
 
 | Argument     | Required | Default | Description |
 |-------------|----------|---------|-------------|
+| `program`     | Yes      | -       | Resource type to generate. Possible options: deployment, pod
 | `--name`    | Yes      | –       | Name of the deployment and container. Must follow DNS-1123 naming rules. |
 | `--image`   | Yes      | –       | Docker image to use for the container. |
 | `--replicas`| No       | 3       | Number of pod replicas the deployment will create. |
@@ -64,15 +65,17 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx
+      app: myapp
+      env: dev
   template:
     metadata:
       labels:
-        app: nginx
+        app: myapp
+        env: dev
     spec:
       containers:
         - name: nginx
-          image: nginx
+          image: nginx:latest
           env:
           - name:  DEBUG
             value: "True"
@@ -124,3 +127,65 @@ To add support for new Kubernetes resources or customize existing functionality,
      ```bash
      pytest tests/
      ```
+
+## Github Action feature
+Here is short documentation how it would work outside of github repo if I had added it to the Github marketplace. Currently it works only on this repo by using following call:
+```yaml
+        - name: Generate Kubernetes deployment
+          uses: ./
+          with:
+            ## args
+```
+Sample usage is stored here [link](https://github.com/DocentSzachista/cdq-recruitment-task/blob/master/.github/workflows/generate_deployment.yaml)
+
+### ⚙️ Inputs
+
+| Name | Description | Required | Default |
+|------|--------------|-----------|----------|
+| **`name`** | Object and container name in the Deployment manifest. | ✅ Yes | — |
+| **`labels`** | Labels in `<key>=<value>` format, comma-separated. If not provided, the `metadata.labels` field will not be created. | ❌ No | — |
+| **`replicas`** | Number of replicas (`spec.replicas`) indicating how many pods should be created. | ❌ No | `3` |
+| **`envs`** | List of environment variables in `<NAME>=<value>` format, comma-separated. | ❌ No | — |
+| **`filename`** | Path to the output file. If the `.yaml` extension is missing, it will be automatically added. | ✅ Yes | — |
+
+
+## 🚀 Example usage
+
+```yaml
+name: Generate Kubernetes Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Application name"
+        required: true
+        default: "my-app"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Deployment manifest
+        uses: docent-szachista/kubernetes-manifest-generator@v1
+        with:
+          name: my-app
+          labels: app=my-app,env=prod
+          replicas: 4
+          envs: DEBUG=true,LOG_LEVEL=info
+          filename: k8s/deployment.yaml
+```
+### How it works
+
+1. Installs Python 3.10
+
+2. Installs dependencies from requirements.txt
+
+3. Builds runtime parameters based on the provided inputs
+
+4. Runs the generator using:
+`python main.py deployment [options]`
+5. Saves file to `k8s/deployment.yaml` file

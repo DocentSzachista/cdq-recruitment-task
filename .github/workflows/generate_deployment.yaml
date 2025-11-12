@@ -33,9 +33,7 @@ jobs:
             envs: ${{github.event.inputs.envs}}
             filename: ${{env.manifest_file}}
           id: kubernetes_manifest
-        - name: Save manifest to file
-          run: echo "${{steps.kubernetes_manifest.outputs.manifest}}" >> ${{env.manifest_file}}
-        - name: Show '${{github.event.inputs.name}}' manifest
+        - name: Preview '${{github.event.inputs.name}}' manifest
           run: |
             echo "--- Manifest file to preview ---"
             cat $manifest_file
