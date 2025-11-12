@@ -11,7 +11,7 @@ metadata:
 spec:
   containers:
     - name: {{ name }}
-      image: {{ image }}
+      image: {{ image }}:latest
 {% if envs %}
       env:
 {% for key, value in envs.items() %}

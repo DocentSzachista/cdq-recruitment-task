@@ -12,15 +12,27 @@ spec:
   replicas: {{ replicas }}
   selector:
     matchLabels:
+{% if labels %}
+{% for key, value in labels.items() %}
+      {{ key }}: {{ value }}
+{% endfor %}
+{% else %}
       app: {{ name }}
+{% endif %}
   template:
     metadata:
       labels:
+{% if labels %}
+{% for key, value in labels.items() %}
+        {{ key }}: {{ value }}
+{% endfor %}
+{% else %}
         app: {{ name }}
+{% endif %}
     spec:
       containers:
         - name: {{ name }}
-          image: {{ image }}
+          image: {{ image }}:latest
           {% if envs -%}
           env:
           {% for key, value in envs.items() -%}

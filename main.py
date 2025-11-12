@@ -48,7 +48,7 @@ def prepare_container_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 
-def prepare_deployment_subparser(parser: argparse.ArgumentParser):
+def prepare_deployment_subparser(parser: argparse.ArgumentParser) -> None:
 
     prepare_metadata_arguments(parser)
     prepare_container_arguments(parser)
@@ -61,7 +61,7 @@ def prepare_deployment_subparser(parser: argparse.ArgumentParser):
     )
 
 
-def prepare_pod_subparser(parser: argparse.ArgumentParser):
+def prepare_pod_subparser(parser: argparse.ArgumentParser) -> None:
 
     prepare_metadata_arguments(parser)
     prepare_container_arguments(parser)
@@ -71,7 +71,7 @@ def prepare_pod_subparser(parser: argparse.ArgumentParser):
 
 def validate_k8s_name(
         value: str
-    ):
+    ) -> str:
     pattern = re.compile(RFC_1123)
     result = pattern.fullmatch(value)
     if not result:
@@ -82,13 +82,13 @@ def validate_k8s_name(
         raise argparse.ArgumentTypeError("Resource name must not exceed 63 characters.")
     return value
 
-def parse_env(env_string: str):
+def parse_env(env_string: str) -> dict:
     return parse_coma_values(env_string, False)
 
-def parse_label(env_string: str):
+def parse_label(env_string: str) -> dict:
     return parse_coma_values(env_string, True)
 
-def parse_coma_values(env_string: str, is_label: bool):
+def parse_coma_values(env_string: str, is_label: bool) -> dict:
     return_dict = {}
 
     parser = re.compile( LABELS_REGEX if is_label else ENV_NAME_REGEX )
@@ -110,8 +110,6 @@ def parse_coma_values(env_string: str, is_label: bool):
 
 if __name__ == "__main__":
     args = vars(prepare_parser())
-    print(args)
-
     output_file = args.pop("output")
     command = args.pop("command")
     if command == "deployment":
